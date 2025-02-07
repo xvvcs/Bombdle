@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bombowo Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="start-container">
+        <h1>Welcome to Bombowo Game</h1>
+        <label for="player-count">Number of Players:</label>
+        <input type="number" id="player-count" min="2" max="6" value="2">
+        <button onclick="startGame()">Start Game</button>
+    </div>
+    
+    <div id="game-container" style="display: none;">
+        <h1>Bombowo Game</h1>
+        <div id="status">Waiting for players...</div>
+        <div id="word-prompt">Loading...</div>
+        <input type="text" id="word-input" placeholder="Enter a word" />
+        <button onclick="submitWord()">Submit</button>
+        <div id="players"></div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -119,3 +119,13 @@ button:hover {
     width: auto;
     margin: 0;
 }
+
+.celebrate {
+    animation: celebration 2s infinite;
+}
+
+@keyframes celebration {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}

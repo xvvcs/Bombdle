@@ -50,12 +50,25 @@ function nextTurn() {
         alert("Game Over!");
         return;
     }
+
+    if (players.length === 1) {
+        declareWinner(players[0]);
+        return;
+    }
     
     currentPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
     document.getElementById("word-prompt").textContent = `Find a word containing: ${currentPair}`;
     document.getElementById("status").textContent = `${players[currentTurn]}'s turn!`;
     highlightCurrentPlayer();
     resetTimer();
+}
+
+function declareWinner(winner) {
+    clearTimeout(timer);
+    document.getElementById("game-container").style.display = "none";
+    document.getElementById("winner-container").style.display = "block";
+    document.getElementById("winner").textContent = `${winner} wins! 🎉`;
+    document.getElementById("winner").classList.add("celebrate");
 }
 
 function highlightCurrentPlayer() {
@@ -113,7 +126,9 @@ function loseLife(player) {
 function goBackToMenu() {
     clearTimeout(timer);
     document.getElementById("game-container").style.display = "none";
+    document.getElementById("winner-container").style.display = "none";
     document.getElementById("start-container").style.display = "block";
+    document.getElementById("winner").classList.remove("celebrate");
     players = [];
     currentTurn = 0;
     lives = {};

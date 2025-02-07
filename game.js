@@ -18,11 +18,36 @@ fetch('words.txt')
     });
 
 function startGame() {
-    let playerCount = document.getElementById("player-count").value;
-    players = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`);
-    lives = Object.fromEntries(players.map(player => [player, 3]));
-    document.getElementById("start-container").style.display = "none";
-    document.getElementById("game-container").style.display = "block";
+    const playerCount = document.getElementById('player-count').value;
+    const nicknameContainer = document.getElementById('nickname-container');
+    const nicknameInputs = document.getElementById('nickname-inputs');
+
+    nicknameInputs.innerHTML = '';
+    for (let i = 1; i <= playerCount; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = `Player ${i} Nickname`;
+        input.id = `player-${i}-nickname`;
+        nicknameInputs.appendChild(input);
+    }
+
+    document.getElementById('start-container').style.display = 'none';
+    nicknameContainer.style.display = 'block';
+}
+
+function startGameWithNicknames() {
+    const playerCount = document.getElementById('player-count').value;
+    players = [];
+
+    for (let i = 1; i <= playerCount; i++) {
+        const nickname = document.getElementById(`player-${i}-nickname`).value;
+        players.push(nickname);
+        lives[nickname] = 3; // Initialize each player with 3 lives
+    }
+
+    document.getElementById('nickname-container').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+
     renderPlayers();
     nextTurn();
 }

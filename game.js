@@ -2,9 +2,20 @@ let players = [];
 let currentTurn = 0;
 let lives = {};
 let usedWords = new Set();
-let wordPairs = ["sh", "oc", "so", "tr", "ex", "un", "al", "in"];
+let wordPairs = [
+    "sh", "oc", "so", "tr", "ex", "un", "al", "in", "th", "he", "an", "re", "er", "on", "at", "en", "nd", "ti", "es", "or", "te", "of", "ed", "is", "it", "ar", "st", "to", "nt", "ng", "se", "ha", "as", "ou", "io", "le", "ve", "co", "me", "de", "hi", "ri", "ro", "ic", "ne", "ea", "ra", "ce", "li", "ch", "ll", "be", "ma", "si", "om", "ur", "ca", "el", "ta", "la", 
+    "no", "di", "pe", "mo", "lo", "us", "mi", "na", "pa", "pr", "po", "do", "fo", "wi", "ho", "we", "wh", "fr", "pl", "gr", "cl", "fl", "bl", "cr", "dr", "br", "gl", "sl", "sp", "sc", "sk", "sm", "sn", "sw", "tw", "qu", "ph", "gh", "kn", "wr", "ck", "ng", "nk", "th", "wh", "sh", "ch", "ph", "gh", "ck", "ng", "nk"
+];
 let currentPair;
 let timer;
+let validWords = new Set();
+
+// Load words from words.txt
+fetch('words.txt')
+    .then(response => response.text())
+    .then(text => {
+        validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));
+    });
 
 function startGame() {
     let playerCount = document.getElementById("player-count").value;
@@ -65,7 +76,7 @@ function resetTimer() {
 
 function submitWord() {
     let input = document.getElementById("word-input").value.toLowerCase();
-    if (!input.includes(currentPair) || usedWords.has(input)) {
+    if (!input.includes(currentPair) || usedWords.has(input) || !validWords.has(input)) {
         showMessage("wrong", "Invalid word or word already used!");
         return;
     }

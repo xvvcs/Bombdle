@@ -38,12 +38,23 @@ function startGame() {
 function startGameWithNicknames() {
     const playerCount = document.getElementById('player-count').value;
     players = [];
+    let nicknameSet = new Set();
+    const nicknameError = document.getElementById('nickname-error');
+    nicknameError.textContent = '';
 
     for (let i = 1; i <= playerCount; i++) {
         const nickname = document.getElementById(`player-${i}-nickname`).value;
+        if (nicknameSet.has(nickname)) {
+            nicknameError.textContent = "Nicknames must be unique. Please enter different nicknames.";
+            return;
+        }
+        nicknameSet.add(nickname);
         players.push(nickname);
         lives[nickname] = 3; // Initialize each player with 3 lives
     }
+
+    // Randomly choose the starting player
+    currentTurn = Math.floor(Math.random() * players.length);
 
     document.getElementById('nickname-container').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';

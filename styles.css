@@ -3,9 +3,17 @@
     src: url('fonts/ClashDisplay-Medium.ttf') format('truetype');
 }
 
+:root {
+    --light-gray: #f1eef0;
+    --blue-gray: #8da5b1;
+    --orange: #e05d1d;
+    --yellow: #d69b2a;
+    --dark-gray: #26232d;
+}
+
 body {
     font-family: 'ClashDisplay', sans-serif;
-    background-color: #f0f0f0;
+    background-color: var(--dark-gray);
     margin: 0;
     padding: 0;
     display: flex;
@@ -13,19 +21,21 @@ body {
     align-items: center;
     height: 100vh;
     position: relative;
+    color: var(--light-gray);
 }
 
-#start-container, #game-container {
-    background-color: #ffffff;
+#start-container, #game-container, #nickname-container, #winner-container {
+    background-color: var(--light-gray);
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
     padding: 20px;
     text-align: center;
     width: 300px;
+    color: var(--dark-gray);
 }
 
 h1 {
-    color: #333;
+    color: var(--yellow);
 }
 
 label, input, button {
@@ -34,17 +44,17 @@ label, input, button {
 }
 
 button {
-    background-color: #007bff;
+    background-color: var(--orange);
     border: none;
     border-radius: 5px;
-    color: white;
+    color: var(--light-gray);
     cursor: pointer;
     padding: 10px;
     transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: var(--blue-gray);
 }
 
 #game-container {
@@ -60,6 +70,7 @@ button:hover {
 #word-prompt {
     font-size: 1.5em;
     font-weight: bold;
+    color: var(--orange);
 }
 
 #word-input {
@@ -68,8 +79,10 @@ button:hover {
     padding: 10px;
     margin: 10px 0;
     box-sizing: border-box;
-    border: 1px solid #ccc;
+    border: 1px solid var(--yellow);
     border-radius: 5px;
+    background-color: var(--dark-gray);
+    color: var(--light-gray);
 }
 
 #players {
@@ -79,18 +92,19 @@ button:hover {
 }
 
 .player {
-    background-color: #e0e0e0;
+    background-color: var(--yellow);
     border-radius: 5px;
     margin: 5px;
     padding: 10px;
     transition: transform 0.3s;
     display: flex;
     align-items: center;
+    color: var(--dark-gray);
 }
 
 .player.active {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--orange);
+    color: var(--light-gray);
     transform: scale(1.1);
 }
 
@@ -100,6 +114,7 @@ button:hover {
     margin-left: 5px;
     font-size: 1.5em;
     animation: pulse 1s infinite;
+    color: var(--blue-gray);
 }
 
 @keyframes pulse {
@@ -114,11 +129,11 @@ button:hover {
 }
 
 .message.correct {
-    color: green;
+    color: var(--blue-gray);
 }
 
 .message.wrong {
-    color: red;
+    color: var(--yellow);
 }
 
 #game-container button:last-of-type {
@@ -129,12 +144,51 @@ button:hover {
     margin: 0;
 }
 
-.celebrate {
-    animation: celebration 2s infinite;
+#nickname-container {
+    text-align: center;
+    margin-top: 20px;
 }
 
-@keyframes celebration {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+#nickname-inputs input {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    width: 80%;
+    max-width: 300px;
+    box-sizing: border-box;
+    border: 1px solid var(--blue-gray);
+    border-radius: 5px;
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+}
+
+#nickname-container button {
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: var(--yellow);
+    color: var(--dark-gray);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#nickname-container button:hover {
+    background-color: var(--orange);
+}
+
+.back-button {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background-color: var(--yellow);
+    color: var(--dark-gray);
+}
+
+.back-button:hover {
+    background-color: var(--blue-gray);
+}
+
+.error-message {
+    color: var(--orange);
+    margin-top: 10px;
 }

@@ -35,9 +35,10 @@ function renderPlayers() {
         playerDiv.className = "player";
         playerDiv.textContent = player;
         for (let i = 0; i < lives[player]; i++) {
-            const heart = document.createElement("span");
+            const heart = document.createElement("img");
             heart.className = "heart";
-            heart.textContent = "❤️";
+            heart.src = "img/heart.png"; // Path to the heart icon image
+            heart.alt = "❤️";
             playerDiv.appendChild(heart);
         }
         playersContainer.appendChild(playerDiv);

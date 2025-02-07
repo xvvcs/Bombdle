@@ -12,6 +12,7 @@
         <label for="player-count">Number of Players:</label>
         <input type="number" id="player-count" min="2" max="6" value="2">
         <button onclick="startGame()">Start Game</button>
+        <div class="help-button" onclick="showHelp()">?</div>
     </div>
     
     <div id="nickname-container" style="display: none;">
@@ -36,6 +37,21 @@
     <div id="winner-container" style="display: none;">
         <h1 id="winner"></h1>
         <button onclick="goBackToMenu()">Go Back to Menu</button>
+    </div>
+
+    <div id="help-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeHelp()">&times;</span>
+            <h2>How to Play</h2>
+            <p>Welcome to Bombdle! Here are the rules:</p>
+            <ul>
+                <li>Choose the number of players (2-6).</li>
+                <li>Enter unique nicknames for each player.</li>
+                <li>Take turns to find words containing the given pair of letters.</li>
+                <li>If a player fails to find a word in time, they lose a life.</li>
+                <li>The last player standing wins the game!</li>
+            </ul>
+        </div>
     </div>
 
     <script src="game.js"></script>

@@ -170,3 +170,11 @@ function goBackToMenu() {
     lives = {};
     usedWords = new Set();
 }
+
+function showHelp() {
+    document.getElementById('help-modal').style.display = 'block';
+}
+
+function closeHelp() {
+    document.getElementById('help-modal').style.display = 'none';
+}

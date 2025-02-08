@@ -20,6 +20,7 @@ Follow these steps to set up and play Bombdle:
     ```bash
     git clone https://github.com/xvvcs/bombdle.git
     cd bombdle
+    open index.html
     ```
 
 2. **Open the project in your preferred code editor (e.g., Visual Studio Code).**

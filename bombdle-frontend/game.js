@@ -1,3 +1,6 @@
+// Ensure this is at the top of your file
+const socket = io('http://127.0.0.1:3000'); // Adjust the URL if your backend is hosted elsewhere
+console.log('Socket initialized:', socket);
 let players = [];
 let currentTurn = 0;
 let lives = {};
@@ -9,8 +12,6 @@ let wordPairs = [
 let currentPair;
 let timer;
 let validWords = new Set();
-
-const socket = io('http://localhost:3000');
 let gameCode;
 
 // Load words from words.txt
@@ -40,11 +41,21 @@ fetch('words.txt')
     }
     
 
-function joinLobby() {
-    const playerName = prompt('Enter your name:');
-    const code = prompt('Enter the game code:');
-    socket.emit('joinLobby', { gameCode: code, playerName });
-}
+    function joinLobby() {
+        const playerName = prompt('Enter your name:');
+        const code = prompt('Enter the game code:');
+    
+        // Ensure socket is initialized before using it
+        if (!socket) {
+            console.error('Socket not initialized.');
+            alert('Unable to connect to the server. Please try again.');
+            return;
+        }
+    
+        // Emit the joinLobby event
+        socket.emit('joinLobby', { gameCode: code, playerName });
+    }
+    
 
 socket.on('playerJoined', (players) => {
     console.log('Players in the lobby:', players);

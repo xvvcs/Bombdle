@@ -8,9 +8,13 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: 'http://127.0.0.1:5500', // Match your frontend's origin
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type'],
+        credentials: true,
     },
 });
+
 
 const lobbies = {}; // Store lobbies with game state
 

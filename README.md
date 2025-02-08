@@ -1,5 +1,3 @@
-![presentation](https://github.com/user-attachments/assets/d11f59f2-53ca-4dd3-8a87-92b2cfb975bb)# Bombdle
-
 Welcome to **Bombdle**, a fun and challenging word game where players take turns finding words containing a given pair of letters. The last player standing wins!
 
 ![Bombdle Logo](img/logo.png)

@@ -1,5 +1,4 @@
-# Bombdle
-
+## Bombdle
 Welcome to **Bombdle**, a fun and challenging word game where players take turns finding words containing a given pair of letters. The last player standing wins!
 
 ![Bombdle Logo](img/logo.png)
@@ -10,7 +9,7 @@ Bombdle is a multiplayer word game where players compete to find words containin
 
 ## Gameplay
 
-![Gameplay GIF](path/to/gameplay.gif)
+![Gameplay GIF](img/presentation.gif)
 
 ## How to setup the game to play it
 
@@ -18,7 +17,7 @@ Follow these steps to set up and play Bombdle:
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/bombdle.git
+    git clone https://github.com/xvvcs/bombdle.git
     cd bombdle
     ```
 
@@ -27,7 +26,11 @@ Follow these steps to set up and play Bombdle:
 3. **Install the necessary libraries:**
     - No external libraries are required for this project.
 
-4. **Open [index.html](http://_vscodecontentref_/0) in your web browser to start the game.**
+4. **Open [index.html](http://_vscodecontentref_/0) in your web browser to start the game.
+   You can use bash command:**
+   ```bash
+   open index.html
+   ```
 
 ## Libraries needed
 

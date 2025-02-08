@@ -1,7 +1,7 @@
 ## Bombdle
 Welcome to **Bombdle**, a fun and challenging word game where players take turns finding words containing a given pair of letters. The last player standing wins!
 
-![Bombdle Logo](img/logo.png)
+![Bombdle Logo](logo.png)
 
 ## What is the game about?
 
@@ -9,7 +9,7 @@ Bombdle is a multiplayer word game where players compete to find words containin
 
 ## Gameplay
 
-![Gameplay GIF](img/presentation.gif)
+![Gameplay GIF](presentation.gif)
 
 ## How to setup the game to play it
 

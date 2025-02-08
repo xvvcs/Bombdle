@@ -18,7 +18,7 @@ Follow these steps to set up and play Bombdle:
 
 1. **Clone the repository:**
     ```bash
-    git clone https://github.com/yourusername/bombdle.git
+    git clone https://github.com/xvvcs/bombdle.git
     cd bombdle
     ```
 

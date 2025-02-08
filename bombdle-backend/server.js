@@ -44,18 +44,46 @@ io.on('connection', (socket) => {
             socket.emit('error', 'Lobby not found');
             return;
         }
-        lobbies[gameCode].players.push({ id: socket.id, name: playerName, lives: 3 });
+    
+        // Check if the player is already in the lobby
+        const playerExists = lobbies[gameCode].players.some(player => player.id === socket.id);
+        if (!playerExists) {
+            lobbies[gameCode].players.push({ id: socket.id, name: playerName, lives: 3 });
+        }
+    
         socket.join(gameCode);
-        io.to(gameCode).emit('playerJoined', lobbies[gameCode].players);
+        io.to(gameCode).emit('playerJoined', lobbies[gameCode].players); // Notify all players
     });
+    
+    
 
     // Start game
     socket.on('startGame', (gameCode) => {
         if (!lobbies[gameCode]) return;
+    
+        // Check if the game has already started
+        if (lobbies[gameCode].gameState.started) {
+            return;
+        }
+    
+        // Mark the game as started
+        lobbies[gameCode].gameState.started = true;
+    
         const wordPairs = generateWordPairs();
-        lobbies[gameCode].gameState = { currentPair: wordPairs.pop(), wordPairs, currentPlayer: 0 };
+        lobbies[gameCode].gameState = {
+            ...lobbies[gameCode].gameState,
+            currentPair: wordPairs.pop(),
+            wordPairs,
+            currentPlayer: 0,
+            players: lobbies[gameCode].players, // Include players in the game state
+        };
+    
         io.to(gameCode).emit('gameStarted', lobbies[gameCode].gameState);
     });
+    
+    
+    
+    
 
     // Submit word
     socket.on('submitWord', ({ gameCode, word }) => {
@@ -72,8 +100,37 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
+    
+        // Remove the disconnected player from all lobbies
+        Object.keys(lobbies).forEach(gameCode => {
+            lobbies[gameCode].players = lobbies[gameCode].players.filter(player => player.id !== socket.id);
+    
+            // Notify remaining players
+            io.to(gameCode).emit('playerJoined', lobbies[gameCode].players);
+        });
     });
+    
+
+    socket.on('leaveLobby', ({ gameCode, playerId }) => {
+        if (!lobbies[gameCode]) return;
+    
+        // Remove the player from the lobby
+        lobbies[gameCode].players = lobbies[gameCode].players.filter(player => player.id !== playerId);
+    
+        // Notify the remaining players
+        io.to(gameCode).emit('playerJoined', lobbies[gameCode].players);
+    });
+
+    socket.on('checkHost', ({ gameCode }) => {
+        if (!lobbies[gameCode]) return;
+        const isHost = lobbies[gameCode].players[0]?.id === socket.id;
+        socket.emit('isHost', isHost); // Let the client know if they are the host
+    });
+    
 });
+
+
+
 
 // Utility: Generate a random 6-character game code
 function generateGameCode() {

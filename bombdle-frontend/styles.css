@@ -24,7 +24,7 @@ body {
     color: var(--light-gray);
 }
 
-#start-container, #game-container, #nickname-container, #winner-container {
+#start-container, #game-container, #nickname-container, #winner-container, #lobby-container {
     background-color: var(--light-gray);
     border-radius: 10px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
@@ -57,10 +57,38 @@ button:hover {
     background-color: var(--blue-gray);
 }
 
+#game-container, #lobby-container {
+    display: none; /* Both are hidden by default */
+}
+
+#game-container.active, #lobby-container.active {
+    display: block; /* Only active container is shown */
+}
+
+#game-container, #lobby-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--light-gray);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 #game-container {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 20px; /* Add spacing between elements */
+    padding: 20px;
+}
+
+#game-container button {
+    width: 200px;
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px 0; /* Add spacing between buttons */
 }
 
 #status, #word-prompt, #players {
@@ -245,3 +273,31 @@ button:hover {
     text-decoration: none;
     cursor: pointer;
 }
+
+#lobby-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Add spacing between elements */
+    padding: 20px;
+    background-color: var(--light-gray);
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+#lobby-container button {
+    width: 200px; /* Ensure consistent button width */
+    padding: 10px;
+    font-size: 16px;
+    margin: 10px 0; /* Add spacing between buttons */
+}
+
+#lobby-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; /* Add spacing between buttons */
+    width: 100%;
+}
+

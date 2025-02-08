@@ -20,7 +20,8 @@
         <h1>Enter Player Nicknames</h1>
         <div id="nickname-inputs"></div>
         <div id="nickname-error" class="error-message"></div>
-        <button onclick="startGame()">Start Game</button>
+        <button id="start-game-button" style="display: none;" onclick="startGame()">Start Game</button>
+
     </div>
 
     <div id="game-container" style="display: none;">
@@ -54,6 +55,21 @@
             </ul>
         </div>
     </div>
+
+    <div id="lobby-container" style="display: none;">
+        <h1>Lobby</h1>
+        <p id="lobby-code">Game Code: <span></span></p>
+        <div id="lobby-players">
+            <h2>Players:</h2>
+            <ul id="players-list"></ul>
+        </div>
+        <div id="lobby-buttons">
+            <button id="start-game-button" onclick="startGame()">Start Game</button>
+            <button onclick="leaveLobby()">Leave Lobby</button>
+        </div>
+    </div>
+    
+    
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="game.js"></script>
 </body>

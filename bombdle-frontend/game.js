@@ -30,9 +30,14 @@ fetch('words.txt')
                 return response.json();
             })
             .then((data) => {
-                const gameCode = data.gameCode;
-                alert(`Lobby created! Share this code with your friends: ${gameCode}`);
-                console.log('New game code created:', gameCode);
+                gameCode = data.gameCode;
+    
+                // Auto-join the lobby as the creator
+                const playerName = prompt('Enter your name:');
+                socket.emit('joinLobby', { gameCode, playerName });
+    
+                // Show the lobby UI
+                showLobby(gameCode);
             })
             .catch(error => {
                 console.error('Error creating lobby:', error);
@@ -40,42 +45,90 @@ fetch('words.txt')
             });
     }
     
+    
+    
 
     function joinLobby() {
         const playerName = prompt('Enter your name:');
         const code = prompt('Enter the game code:');
     
-        // Ensure socket is initialized before using it
         if (!socket) {
             console.error('Socket not initialized.');
             alert('Unable to connect to the server. Please try again.');
             return;
         }
     
+        gameCode = code; // Store the game code for this player
+    
         // Emit the joinLobby event
         socket.emit('joinLobby', { gameCode: code, playerName });
+    
+        // Show the lobby UI
+        showLobby(code);
     }
     
+    
+    
 
-socket.on('playerJoined', (players) => {
-    console.log('Players in the lobby:', players);
-    renderPlayers(players);
-});
+    socket.on('playerJoined', (players) => {
+        console.log('Players in the lobby:', players);
+        const playersList = document.getElementById('players-list');
+        playersList.innerHTML = ''; // Clear the list
+    
+        players.forEach(player => {
+            const listItem = document.createElement('li');
+            listItem.textContent = player.name;
+            playersList.appendChild(listItem);
+        });
+    
+        // Make the "Start Game" button visible for all players
+        document.getElementById('start-game-button').style.display = 'block';
+    });
+    
+    
+    
 
-function startGame() {
-    socket.emit('startGame', gameCode);
+    function startGame() {
+        if (!gameCode) {
+            alert('Game code is missing. Please rejoin the lobby.');
+            return;
+        }
+    
+        socket.emit('startGame', gameCode); // Emit startGame event to the server
+        console.log('Game started by player.');
+    }
+    
+    
+
+function leaveLobby() {
+    socket.emit('leaveLobby', { gameCode, playerId: socket.id }); // Optional: Notify the server
+    document.getElementById('lobby-container').style.display = 'none';
+    document.getElementById('start-container').style.display = 'block';
 }
+
 
 socket.on('gameStarted', (gameState) => {
     console.log('Game started!', gameState);
-    players = gameState.players;
-    currentTurn = gameState.currentTurn;
-    lives = gameState.lives;
-    document.getElementById('nickname-container').style.display = 'none';
+
+    // Show game UI and hide lobby
+    document.getElementById('lobby-container').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
-    renderPlayers();
+
+    // Update game state
+    players = gameState.players;
+    currentTurn = gameState.currentPlayer;
+    currentPair = gameState.currentPair;
+
+    document.getElementById('word-prompt').textContent = `Find a word containing: ${currentPair}`;
+    document.getElementById('status').textContent = `${players[currentTurn].name}'s turn!`;
+
+    renderPlayers(players);
     nextTurn();
 });
+
+
+
+
 
 function submitWord() {
     const word = document.getElementById('word-input').value.toLowerCase();
@@ -96,21 +149,23 @@ socket.on('invalidWord', ({ word }) => {
 
 function renderPlayers(playersList) {
     const playersContainer = document.getElementById("players");
-    playersContainer.innerHTML = '';
+    playersContainer.innerHTML = ''; // Clear previous player cards
+
     playersList.forEach(player => {
         const playerDiv = document.createElement("div");
         playerDiv.className = "player";
-        playerDiv.textContent = player.name;
+        playerDiv.textContent = `${player.name} - Lives: ${player.lives}`;
         for (let i = 0; i < player.lives; i++) {
             const heart = document.createElement("img");
             heart.className = "heart";
-            heart.src = "img/heart.png"; // Path to the heart icon image
+            heart.src = "img/heart.png";
             heart.alt = "❤️";
             playerDiv.appendChild(heart);
         }
         playersContainer.appendChild(playerDiv);
     });
 }
+
 
 function nextTurn() {
     if (players.length === 0) {
@@ -122,13 +177,14 @@ function nextTurn() {
         declareWinner(players[0].name);
         return;
     }
-    
-    currentPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
+
     document.getElementById("word-prompt").textContent = `Find a word containing: ${currentPair}`;
     document.getElementById("status").textContent = `${players[currentTurn].name}'s turn!`;
+
     highlightCurrentPlayer();
     resetTimer();
 }
+
 
 function declareWinner(winner) {
     clearTimeout(timer);
@@ -198,3 +254,17 @@ function showHelp() {
 function closeHelp() {
     document.getElementById('help-modal').style.display = 'none';
 }
+
+function showLobby(gameCode) {
+    document.getElementById('start-container').style.display = 'none';
+    document.getElementById('lobby-container').style.display = 'block';
+    document.getElementById('lobby-code').querySelector('span').textContent = gameCode;
+
+    // Check if this client is the host
+    socket.emit('checkHost', { gameCode });
+}
+
+socket.on('isHost', (isHost) => {
+    document.getElementById('start-game-button').style.display = isHost ? 'block' : 'none';
+});
+

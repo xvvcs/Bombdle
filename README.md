@@ -10,7 +10,7 @@ Bombdle is a multiplayer word game where players compete to find words containin
 
 ## Gameplay
 
-![Gameplay GIF](path/to/gameplay.gif)
+![Gameplay GIF](img/presentation.gif)
 
 ## How to setup the game to play it
 

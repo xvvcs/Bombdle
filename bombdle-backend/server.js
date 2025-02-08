@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -13,15 +14,21 @@ const io = new Server(server, {
 
 const lobbies = {}; // Store lobbies with game state
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://127.0.0.1:5500', // Allow requests from the frontend
+    methods: ['GET', 'POST'],
+}));
 app.use(express.json());
 
 // API to create a lobby
 app.post('/create-lobby', (req, res) => {
-    const gameCode = generateGameCode();
-    lobbies[gameCode] = { players: [], gameState: {} };
-    res.json({ gameCode });
+    const gameCode = generateGameCode(); // Generate a unique code
+    lobbies[gameCode] = { players: [], gameState: {} }; // Store the lobby
+    res.status(200).json({ gameCode }); // Respond with the game code
+    console.log('New game code created:', gameCode);
+
 });
+
 
 // WebSocket connection handler
 io.on('connection', (socket) => {

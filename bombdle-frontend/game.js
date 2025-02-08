@@ -10,70 +10,90 @@ let currentPair;
 let timer;
 let validWords = new Set();
 
+const socket = io('http://localhost:3000');
+let gameCode;
 
+// Load words from words.txt
 fetch('words.txt')
     .then(response => response.text())
     .then(text => {
         validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));
     });
 
-function startGame() {
-    const playerCount = document.getElementById('player-count').value;
-    const nicknameContainer = document.getElementById('nickname-container');
-    const nicknameInputs = document.getElementById('nickname-inputs');
-
-    nicknameInputs.innerHTML = '';
-    for (let i = 1; i <= playerCount; i++) {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = `Player ${i} Nickname`;
-        input.id = `player-${i}-nickname`;
-        nicknameInputs.appendChild(input);
+    function createLobby() {
+        fetch('http://127.0.0.1:3000/create-lobby', { method: 'POST' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                const gameCode = data.gameCode;
+                alert(`Lobby created! Share this code with your friends: ${gameCode}`);
+                console.log('New game code created:', gameCode);
+            })
+            .catch(error => {
+                console.error('Error creating lobby:', error);
+                alert('Failed to create lobby. Please try again.');
+            });
     }
+    
 
-    document.getElementById('start-container').style.display = 'none';
-    nicknameContainer.style.display = 'block';
+function joinLobby() {
+    const playerName = prompt('Enter your name:');
+    const code = prompt('Enter the game code:');
+    socket.emit('joinLobby', { gameCode: code, playerName });
 }
 
-function startGameWithNicknames() {
-    const playerCount = document.getElementById('player-count').value;
-    players = [];
-    let nicknameSet = new Set();
-    const nicknameError = document.getElementById('nickname-error');
-    nicknameError.textContent = '';
+socket.on('playerJoined', (players) => {
+    console.log('Players in the lobby:', players);
+    renderPlayers(players);
+});
 
-    for (let i = 1; i <= playerCount; i++) {
-        const nickname = document.getElementById(`player-${i}-nickname`).value;
-        if (nicknameSet.has(nickname)) {
-            nicknameError.textContent = "Nicknames must be unique. Please enter different nicknames.";
-            return;
-        }
-        nicknameSet.add(nickname);
-        players.push(nickname);
-        lives[nickname] = 3; 
-    }
+function startGame() {
+    socket.emit('startGame', gameCode);
+}
 
-    
-    currentTurn = Math.floor(Math.random() * players.length);
-
+socket.on('gameStarted', (gameState) => {
+    console.log('Game started!', gameState);
+    players = gameState.players;
+    currentTurn = gameState.currentTurn;
+    lives = gameState.lives;
     document.getElementById('nickname-container').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
-
     renderPlayers();
     nextTurn();
+});
+
+function submitWord() {
+    const word = document.getElementById('word-input').value.toLowerCase();
+    socket.emit('submitWord', { gameCode, word });
 }
 
-function renderPlayers() {
+socket.on('validWord', ({ word }) => {
+    console.log(`Valid word: ${word}`);
+    showMessage("correct", "Correct!");
+    document.getElementById("word-input").value = ''; // Clear the input field
+    nextPlayer();
+});
+
+socket.on('invalidWord', ({ word }) => {
+    console.log(`Invalid word: ${word}`);
+    showMessage("wrong", "Invalid word or word already used!");
+});
+
+function renderPlayers(playersList) {
     const playersContainer = document.getElementById("players");
     playersContainer.innerHTML = '';
-    players.forEach(player => {
+    playersList.forEach(player => {
         const playerDiv = document.createElement("div");
         playerDiv.className = "player";
-        playerDiv.textContent = player;
-        for (let i = 0; i < lives[player]; i++) {
+        playerDiv.textContent = player.name;
+        for (let i = 0; i < player.lives; i++) {
             const heart = document.createElement("img");
             heart.className = "heart";
-            heart.src = "img/heart.png"; 
+            heart.src = "img/heart.png"; // Path to the heart icon image
             heart.alt = "❤️";
             playerDiv.appendChild(heart);
         }
@@ -88,13 +108,13 @@ function nextTurn() {
     }
 
     if (players.length === 1) {
-        declareWinner(players[0]);
+        declareWinner(players[0].name);
         return;
     }
     
     currentPair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
     document.getElementById("word-prompt").textContent = `Find a word containing: ${currentPair}`;
-    document.getElementById("status").textContent = `${players[currentTurn]}'s turn!`;
+    document.getElementById("status").textContent = `${players[currentTurn].name}'s turn!`;
     highlightCurrentPlayer();
     resetTimer();
 }
@@ -121,19 +141,7 @@ function highlightCurrentPlayer() {
 function resetTimer() {
     clearTimeout(timer);
     let timeLimit = Math.floor(Math.random() * 5) + 5;
-    timer = setTimeout(() => loseLife(players[currentTurn]), timeLimit * 1000);
-}
-
-function submitWord() {
-    let input = document.getElementById("word-input").value.toLowerCase();
-    if (!input.includes(currentPair) || usedWords.has(input) || !validWords.has(input)) {
-        showMessage("wrong", "Invalid word or word already used!");
-        return;
-    }
-    usedWords.add(input);
-    showMessage("correct", "Correct!");
-    document.getElementById("word-input").value = ''; 
-    nextPlayer();
+    timer = setTimeout(() => loseLife(players[currentTurn].name), timeLimit * 1000);
 }
 
 function showMessage(type, text) {
@@ -147,14 +155,15 @@ function showMessage(type, text) {
 
 function nextPlayer() {
     currentTurn = (currentTurn + 1) % players.length;
-    renderPlayers(); 
+    renderPlayers(players); // Update the players' lives display
     nextTurn();
 }
 
-function loseLife(player) {
-    lives[player]--;
-    if (lives[player] <= 0) {
-        players = players.filter(p => p !== player);
+function loseLife(playerName) {
+    const player = players.find(p => p.name === playerName);
+    player.lives--;
+    if (player.lives <= 0) {
+        players = players.filter(p => p.name !== playerName);
     }
     nextPlayer();
 }

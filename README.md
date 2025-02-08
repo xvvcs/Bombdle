@@ -1,3 +1,4 @@
+## Bombdle
 Welcome to **Bombdle**, a fun and challenging word game where players take turns finding words containing a given pair of letters. The last player standing wins!
 
 ![Bombdle Logo](img/logo.png)

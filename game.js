@@ -10,7 +10,7 @@ let currentPair;
 let timer;
 let validWords = new Set();
 
-// Load words from words.txt
+
 fetch('words.txt')
     .then(response => response.text())
     .then(text => {
@@ -50,10 +50,10 @@ function startGameWithNicknames() {
         }
         nicknameSet.add(nickname);
         players.push(nickname);
-        lives[nickname] = 3; // Initialize each player with 3 lives
+        lives[nickname] = 3; 
     }
 
-    // Randomly choose the starting player
+    
     currentTurn = Math.floor(Math.random() * players.length);
 
     document.getElementById('nickname-container').style.display = 'none';
@@ -73,7 +73,7 @@ function renderPlayers() {
         for (let i = 0; i < lives[player]; i++) {
             const heart = document.createElement("img");
             heart.className = "heart";
-            heart.src = "img/heart.png"; // Path to the heart icon image
+            heart.src = "img/heart.png"; 
             heart.alt = "❤️";
             playerDiv.appendChild(heart);
         }
@@ -132,7 +132,7 @@ function submitWord() {
     }
     usedWords.add(input);
     showMessage("correct", "Correct!");
-    document.getElementById("word-input").value = ''; // Clear the input field
+    document.getElementById("word-input").value = ''; 
     nextPlayer();
 }
 
@@ -147,7 +147,7 @@ function showMessage(type, text) {
 
 function nextPlayer() {
     currentTurn = (currentTurn + 1) % players.length;
-    renderPlayers(); // Update the players' lives display
+    renderPlayers(); 
     nextTurn();
 }
 

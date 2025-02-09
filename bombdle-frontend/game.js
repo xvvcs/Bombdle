@@ -1,5 +1,8 @@
 // Ensure this is at the top of your file
-const socket = io('http://127.0.0.1:3000'); // Adjust the URL if your backend is hosted elsewhere
+const socket = io('http://127.0.0.1:3000', {
+    transports: ['websocket', 'polling'], // Ensure both transport options are available
+});
+// Adjust the URL if your backend is hosted elsewhere
 console.log('Socket initialized:', socket);
 let players = [];
 let currentTurn = 0;
@@ -18,8 +21,10 @@ let gameCode;
 fetch('words.txt')
     .then(response => response.text())
     .then(text => {
-        validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));
-    });
+        validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase())); // Fix the typo here
+    })
+    .catch(error => console.error('Failed to load words:', error));
+
 
     function createLobby() {
         fetch('http://127.0.0.1:3000/create-lobby', { method: 'POST' })
@@ -45,8 +50,6 @@ fetch('words.txt')
             });
     }
     
-    
-    
 
     function joinLobby() {
         const playerName = prompt('Enter your name:');
@@ -70,21 +73,21 @@ fetch('words.txt')
     
     
 
-    socket.on('playerJoined', (players) => {
-        console.log('Players in the lobby:', players);
+    socket.on('playerJoined', (updatedPlayers) => {
+        players = updatedPlayers;
+        updatePlayersList(players);
+    });
+    
+    function updatePlayersList(players) {
         const playersList = document.getElementById('players-list');
-        playersList.innerHTML = ''; // Clear the list
+        playersList.innerHTML = '';
     
         players.forEach(player => {
             const listItem = document.createElement('li');
             listItem.textContent = player.name;
             playersList.appendChild(listItem);
         });
-    
-        // Make the "Start Game" button visible for all players
-        document.getElementById('start-game-button').style.display = 'block';
-    });
-    
+    }
     
     
 
@@ -110,7 +113,7 @@ function leaveLobby() {
 socket.on('gameStarted', (gameState) => {
     console.log('Game started!', gameState);
 
-    // Show game UI and hide lobby
+    // Hide lobby and show game UI
     document.getElementById('lobby-container').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
 
@@ -119,12 +122,37 @@ socket.on('gameStarted', (gameState) => {
     currentTurn = gameState.currentPlayer;
     currentPair = gameState.currentPair;
 
+    // Update UI
     document.getElementById('word-prompt').textContent = `Find a word containing: ${currentPair}`;
     document.getElementById('status').textContent = `${players[currentTurn].name}'s turn!`;
 
     renderPlayers(players);
-    nextTurn();
 });
+
+
+// Update the word prompt and toggle button visibility
+// Listen for game state updates
+socket.on('updateGameState', (gameState) => {
+    players = gameState.players;
+    currentTurn = gameState.currentPlayer;
+    currentPair = gameState.currentPair;
+
+    // Update the UI
+    document.getElementById('word-prompt').textContent = `Find a word containing: ${currentPair}`;
+    document.getElementById('status').textContent = `${players[currentTurn].name}'s turn!`;
+    renderPlayers(players);
+
+    // Enable/disable the word input and submit button
+    const isCurrentPlayer = players[currentTurn].id === socket.id;
+    document.getElementById('word-input').disabled = !isCurrentPlayer;
+    document.querySelector('[onclick="submitWord()"]').style.display = isCurrentPlayer ? 'inline-block' : 'none';
+
+    highlightCurrentPlayer();
+});
+
+
+
+
 
 
 
@@ -148,23 +176,39 @@ socket.on('invalidWord', ({ word }) => {
 });
 
 function renderPlayers(playersList) {
-    const playersContainer = document.getElementById("players");
-    playersContainer.innerHTML = ''; // Clear previous player cards
+    if (!playersList || playersList.length === 0) return;
+
+    const playersContainer = document.getElementById('players');
+    playersContainer.innerHTML = ''; // Clear previous content
 
     playersList.forEach(player => {
-        const playerDiv = document.createElement("div");
-        playerDiv.className = "player";
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'player';
         playerDiv.textContent = `${player.name} - Lives: ${player.lives}`;
         for (let i = 0; i < player.lives; i++) {
-            const heart = document.createElement("img");
-            heart.className = "heart";
-            heart.src = "img/heart.png";
-            heart.alt = "❤️";
+            const heart = document.createElement('img');
+            heart.className = 'heart';
+            heart.src = 'img/heart.png';
+            heart.alt = '❤️';
             playerDiv.appendChild(heart);
         }
         playersContainer.appendChild(playerDiv);
     });
 }
+
+function highlightCurrentPlayer() {
+    if (!players || players.length === 0 || currentTurn === undefined) return;
+
+    const playerDivs = document.querySelectorAll('.player');
+    playerDivs.forEach((div, index) => {
+        if (index === currentTurn) {
+            div.classList.add('active');
+        } else {
+            div.classList.remove('active');
+        }
+    });
+}
+
 
 
 function nextTurn() {
@@ -195,15 +239,16 @@ function declareWinner(winner) {
 }
 
 function highlightCurrentPlayer() {
-    const playerDivs = document.querySelectorAll(".player");
+    const playerDivs = document.querySelectorAll('.player');
     playerDivs.forEach((div, index) => {
         if (index === currentTurn) {
-            div.classList.add("active");
+            div.classList.add('active');
         } else {
-            div.classList.remove("active");
+            div.classList.remove('active');
         }
     });
 }
+
 
 function resetTimer() {
     clearTimeout(timer);

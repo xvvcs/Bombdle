@@ -16,7 +16,7 @@ let timer;
 let validWords = new Set();
 let gameCode;
 
-fetch('http://your_public_ip_or_domain:3000/bombdle-backend/words.txt')
+fetch('http://your_public_ip_or_domain:3000/code/bombdle-backend/words.txt')
     .then(response => response.text())
     .then(text => {
         validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));

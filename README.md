@@ -37,13 +37,14 @@ Follow these steps to set up and play Bombdle:
 
 4. **Run the backend server:**
     ```bash
-    cd bombdle-backend
+    cd code/bombdle-backend
     node server.js
     ```
 
 5. **Open [index.html](http://_vscodecontentref_/0) in your web browser to start the game (Preferably with Live-Server).
    You can use bash command:**
    ```bash
+   cd code/bombdle-frontend
    open index.html
    ```
 

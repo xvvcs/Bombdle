@@ -1,4 +1,4 @@
-const socket = io('http://127.0.0.1:3000', {
+    const socket = io('http://127.0.0.1:3000', {
         transports: ['websocket', 'polling'],
     });
     console.log('Socket initialized:', socket);
@@ -16,7 +16,7 @@ const socket = io('http://127.0.0.1:3000', {
     let validWords = new Set();
     let gameCode;
 
-    fetch('words.txt')
+    fetch('../bombdle-backend/words.txt')
         .then(response => response.text())
         .then(text => {
             validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));
@@ -128,8 +128,11 @@ const socket = io('http://127.0.0.1:3000', {
     });
 
     function submitWord() {
-        const word = document.getElementById('word-input').value.toLowerCase();
-        socket.emit('submitWord', { gameCode, word });
+        const word = document.getElementById('word-input').value.toLowerCase();        if (validWords.has(word)) {
+            socket.emit('submitWord', { gameCode, word });
+        } else {
+            showMessage("wrong", "Invalid word or word already used!");
+        }
     }
 
     socket.on('validWord', ({ word }) => {
@@ -192,7 +195,6 @@ const socket = io('http://127.0.0.1:3000', {
         document.getElementById("word-prompt").textContent = `Find a word containing: ${currentPair}`;
         document.getElementById("status").textContent = `${players[currentTurn].name}'s turn!`;
         highlightCurrentPlayer();
-        //resetTimer();
     }
 
     function declareWinner(winner) {
@@ -202,12 +204,6 @@ const socket = io('http://127.0.0.1:3000', {
         document.getElementById("winner").textContent = `${winner} wins! 🎉`;
         document.getElementById("winner").classList.add("celebrate");
     }
-
-    // //function resetTimer() {
-    //     clearTimeout(timer);
-    //     let timeLimit = Math.floor(Math.random() * 5) + 5;
-    //     timer = setTimeout(() => loseLife(players[currentTurn].name), timeLimit * 1000);
-    // }
 
     function showMessage(type, text) {
         const messageDiv = document.querySelector(`.message.${type}`);
@@ -262,6 +258,6 @@ const socket = io('http://127.0.0.1:3000', {
     }
 
     socket.on('isHost', (isHost) => {
-        document.getElementById('start-game-button').style.display = isHost ? 'block' : 'none';
+        document.getElementById('start-game-button').style.display = isHost ? 'block' : 'none';   
 });
 

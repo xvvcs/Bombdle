@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -15,6 +16,15 @@ const io = new Server(server, {
 });
 
 const lobbies = {};
+let validWords = new Set();
+
+fs.readFile('words.txt', 'utf8', (err, data) => {
+    if (err) {
+        console.error('Failed to load words:', err);
+        return;
+    }
+    validWords = new Set(data.split('\n').map(word => word.trim().toLowerCase()));
+});
 
 app.use(cors({
     origin: 'http://127.0.0.1:5500',
@@ -74,7 +84,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        if (word.includes(gameState.currentPair)) {
+        if (word.includes(gameState.currentPair) && validWords.has(word)) {
             io.to(gameCode).emit('validWord', { word });
             gameState.currentPair = gameState.wordPairs.pop();
             gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
@@ -147,7 +157,7 @@ function initializeGameState(gameCode) {
         currentPlayer: 0,
         started: true,
         timer: null,
-        timeLeft: 10 // Set initial time limit for each turn
+        timeLeft: 10 
     };
 }
 

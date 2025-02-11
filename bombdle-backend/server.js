@@ -3,20 +3,18 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'http://127.0.0.1:5500', // Match your frontend's origin
+        origin: 'http://127.0.0.1:5500',
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type'],
         credentials: true,
     },
 });
 
-
-const lobbies = {}; // Store lobbies with game state
+const lobbies = {};
 
 app.use(cors({
     origin: 'http://127.0.0.1:5500',
@@ -27,146 +25,166 @@ app.use(cors({
 
 app.use(express.json());
 
-// API to create a lobby
 app.post('/create-lobby', (req, res) => {
-    const gameCode = generateGameCode(); // Generate a unique code
-    lobbies[gameCode] = { players: [], gameState: {} }; // Store the lobby
-    res.status(200).json({ gameCode }); // Respond with the game code
+    const gameCode = generateGameCode();
+    lobbies[gameCode] = { players: [], gameState: {} };
+    res.status(200).json({ gameCode });
     console.log('New game code created:', gameCode);
-
 });
 
-
-// WebSocket connection handler
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // Join a lobby
     socket.on('joinLobby', ({ gameCode, playerName }) => {
         if (!lobbies[gameCode]) {
             socket.emit('error', 'Lobby not found');
             return;
         }
-    
+
         const playerExists = lobbies[gameCode].players.some(player => player.id === socket.id);
         if (!playerExists) {
             lobbies[gameCode].players.push({ id: socket.id, name: playerName, lives: 3 });
         }
-    
-        socket.join(gameCode);
-        io.to(gameCode).emit('playerJoined', lobbies[gameCode].players); // Notify all players
-    });
-    
 
-    // Start game
+        socket.join(gameCode);
+        io.to(gameCode).emit('playerJoined', lobbies[gameCode].players);
+    });
+
     socket.on('startGame', (gameCode) => {
         if (!lobbies[gameCode]) {
             console.error('Game code not found:', gameCode);
             return;
         }
-    
-        // Ensure the game state is initialized
+
         if (!lobbies[gameCode].gameState.started) {
-            const wordPairs = generateWordPairs();
-            lobbies[gameCode].gameState = {
-                started: true,
-                players: lobbies[gameCode].players,
-                currentPair: wordPairs.pop(),
-                wordPairs,
-                currentPlayer: 0,
-            };
-    
+            initializeGameState(gameCode);
             io.to(gameCode).emit('gameStarted', lobbies[gameCode].gameState);
             console.log(`Game started for lobby ${gameCode}`);
+            startTurnTimer(gameCode);
         }
     });
-    
 
-    // Submit word
     socket.on('submitWord', ({ gameCode, word }) => {
         if (!lobbies[gameCode]) return;
         const gameState = lobbies[gameCode].gameState;
-    
         const currentPlayer = gameState.players[gameState.currentPlayer];
-    
+
         if (socket.id !== currentPlayer.id) {
             socket.emit('error', { message: "It's not your turn!" });
             return;
         }
-    
+
         if (word.includes(gameState.currentPair)) {
             io.to(gameCode).emit('validWord', { word });
-    
             gameState.currentPair = gameState.wordPairs.pop();
             gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
-    
             broadcastGameState(gameCode);
+            startTurnTimer(gameCode);
         } else {
-            socket.emit('invalidWord', { word });
+            currentPlayer.lives--;
+            if (currentPlayer.lives <= 0) {
+                gameState.players = gameState.players.filter(player => player.id !== currentPlayer.id);
+            }
+            io.to(gameCode).emit('invalidWord', { word });
+            gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
+            broadcastGameState(gameCode);
+            startTurnTimer(gameCode);
         }
     });
-    
 
     socket.on('disconnect', () => {
         console.log('A user disconnected:', socket.id);
-
-        // Remove the disconnected player from all lobbies
         Object.keys(lobbies).forEach(gameCode => {
             lobbies[gameCode].players = lobbies[gameCode].players.filter(player => player.id !== socket.id);
-
-            // Notify remaining players
             io.to(gameCode).emit('playerJoined', lobbies[gameCode].players);
         });
     });
 
     socket.on('leaveLobby', ({ gameCode, playerId }) => {
         if (!lobbies[gameCode]) return;
-
-        // Remove the player from the lobby
         lobbies[gameCode].players = lobbies[gameCode].players.filter(player => player.id !== playerId);
-
-        // Notify the remaining players
         io.to(gameCode).emit('playerJoined', lobbies[gameCode].players);
     });
 
     socket.on('checkHost', ({ gameCode }) => {
         if (!lobbies[gameCode]) return;
         const isHost = lobbies[gameCode].players[0]?.id === socket.id;
-        socket.emit('isHost', isHost); // Let the client know if they are the host
+        socket.emit('isHost', isHost);
     });
 });
 
-
-
-
-// Utility: Generate a random 6-character game code
 function generateGameCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 function broadcastGameState(gameCode) {
     if (lobbies[gameCode]) {
-        io.to(gameCode).emit('updateGameState', lobbies[gameCode].gameState);
+        const gameState = lobbies[gameCode].gameState;
+        const sanitizedGameState = {
+            players: gameState.players.map(player => ({
+                id: player.id,
+                name: player.name,
+                lives: player.lives
+            })),
+            currentPair: gameState.currentPair,
+            currentPlayer: gameState.currentPlayer,
+            started: gameState.started
+        };
+        io.to(gameCode).emit('updateGameState', sanitizedGameState);
     }
 }
 
 function initializeGameState(gameCode) {
     const wordPairs = generateWordPairs();
+    const players = lobbies[gameCode].players.map(player => ({
+        ...player,
+        lives: player.lives || 3 
+    }));
     lobbies[gameCode].gameState = {
-        players: lobbies[gameCode].players,
+        players,
         currentPair: wordPairs.pop(),
         wordPairs,
         currentPlayer: 0,
         started: true,
+        timer: null,
+        timeLeft: 10 // Set initial time limit for each turn
     };
 }
 
-// Utility: Generate word pairs
 function generateWordPairs() {
     return [
         "sh", "oc", "so", "tr", "ex", "un", "al", "in", "th", "he", "an", "re", "er", "on", "at", "en",
         "nd", "ti", "es", "or", "te", "of", "ed", "is", "it", "ar", "st", "to", "nt", "ng", "se", "ha",
     ];
+}
+
+function startTurnTimer(gameCode) {
+    const gameState = lobbies[gameCode].gameState;
+    clearInterval(gameState.timer);
+    gameState.timeLeft = 10; 
+
+    gameState.timer = setInterval(() => {
+        gameState.timeLeft--;
+        io.to(gameCode).emit('updateTime', gameState.timeLeft);
+
+        if (gameState.timeLeft <= 0) {
+            clearInterval(gameState.timer);
+            const currentPlayer = gameState.players[gameState.currentPlayer];
+            if (currentPlayer) {
+                currentPlayer.lives--;
+                if (currentPlayer.lives <= 0) {
+                    gameState.players = gameState.players.filter(player => player.id !== currentPlayer.id);
+                }
+                gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
+                if (gameState.players.length > 0) {
+                    broadcastGameState(gameCode);
+                    startTurnTimer(gameCode);
+                } else {
+                    io.to(gameCode).emit('gameOver', { message: "Game Over!" });
+                }
+            }
+        }
+    }, 1000);
 }
 
 const PORT = 3000;

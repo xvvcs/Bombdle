@@ -1,4 +1,4 @@
-    const socket = io('http://127.0.0.1:3000', {
+const socket = io('http://127.0.0.1:3000', {
         transports: ['websocket', 'polling'],
     });
     console.log('Socket initialized:', socket);
@@ -119,6 +119,14 @@
         document.getElementById('timer').textContent = `Time left: ${timeLeft}s`;
     });
 
+    socket.on('gameOver', ({ winner }) => {
+        clearTimeout(timer);
+        document.getElementById("game-container").style.display = "none";
+        document.getElementById("winner-container").style.display = "block";
+        document.getElementById("winner").textContent = `${winner} wins! 🎉`;
+        document.getElementById("winner").classList.add("celebrate");
+    });
+
     function submitWord() {
         const word = document.getElementById('word-input').value.toLowerCase();
         socket.emit('submitWord', { gameCode, word });
@@ -184,7 +192,7 @@
         document.getElementById("word-prompt").textContent = `Find a word containing: ${currentPair}`;
         document.getElementById("status").textContent = `${players[currentTurn].name}'s turn!`;
         highlightCurrentPlayer();
-        resetTimer();
+        //resetTimer();
     }
 
     function declareWinner(winner) {
@@ -195,11 +203,11 @@
         document.getElementById("winner").classList.add("celebrate");
     }
 
-    function resetTimer() {
-        clearTimeout(timer);
-        let timeLimit = Math.floor(Math.random() * 5) + 5;
-        timer = setTimeout(() => loseLife(players[currentTurn].name), timeLimit * 1000);
-    }
+    // //function resetTimer() {
+    //     clearTimeout(timer);
+    //     let timeLimit = Math.floor(Math.random() * 5) + 5;
+    //     timer = setTimeout(() => loseLife(players[currentTurn].name), timeLimit * 1000);
+    // }
 
     function showMessage(type, text) {
         const messageDiv = document.querySelector(`.message.${type}`);

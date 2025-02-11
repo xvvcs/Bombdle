@@ -175,8 +175,10 @@ function startTurnTimer(gameCode) {
                 if (currentPlayer.lives <= 0) {
                     gameState.players = gameState.players.filter(player => player.id !== currentPlayer.id);
                 }
-                gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
-                if (gameState.players.length > 0) {
+                if (gameState.players.length === 1) {
+                    io.to(gameCode).emit('gameOver', { winner: gameState.players[0].name });
+                } else if (gameState.players.length > 0) {
+                    gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
                     broadcastGameState(gameCode);
                     startTurnTimer(gameCode);
                 } else {

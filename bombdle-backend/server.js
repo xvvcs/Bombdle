@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'http://127.0.0.1:5500',
+        origin: '*', 
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type'],
         credentials: true,
@@ -27,7 +27,7 @@ fs.readFile('words.txt', 'utf8', (err, data) => {
 });
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5500',
+    origin: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true,

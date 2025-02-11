@@ -24,9 +24,24 @@ Follow these steps to set up and play Bombdle:
 2. **Open the project in your preferred code editor (e.g., Visual Studio Code).**
 
 3. **Install the necessary libraries:**
-    - No external libraries are required for this project.
+    - node (npm)
+    To install node type this in your Powershell(windows):
+    ```bash
+    winget install Schniz.fnm
+    fnm install 22
+    # Verify the Node.js version:
+    node -v # Should print "v22.14.0".
+    # Verify npm version:
+    npm -v # Should print "10.9.2".
+    ```
 
-4. **Open [index.html](http://_vscodecontentref_/0) in your web browser to start the game.
+4. **Run the backend server:**
+    ```bash
+    cd bombdle-backend
+    node server.js
+    ```
+
+5. **Open [index.html](http://_vscodecontentref_/0) in your web browser to start the game (Preferably with Live-Server).
    You can use bash command:**
    ```bash
    open index.html

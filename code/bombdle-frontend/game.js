@@ -1,4 +1,4 @@
-const socket = io('http://http://157.230.26.97:3000', {
+const socket = io('http://157.230.26.97:3000', {
     transports: ['websocket', 'polling'],
 });
 console.log('Socket initialized:', socket);

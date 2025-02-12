@@ -200,4 +200,4 @@ function startTurnTimer(gameCode) {
 }
 
 const PORT = 3000;
-server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Server running on http://159.89.9.120:3000`));

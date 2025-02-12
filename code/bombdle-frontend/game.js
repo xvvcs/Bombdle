@@ -1,4 +1,4 @@
-const socket = io('http://http://157.230.26.97:8080', {
+const socket = io('http://http://157.230.26.97:3000', {
     transports: ['websocket', 'polling'],
 });
 console.log('Socket initialized:', socket);
@@ -16,7 +16,7 @@ let timer;
 let validWords = new Set();
 let gameCode;
 
-fetch('http://157.230.26.97:8080/code/bombdle-backend/words.txt')
+fetch('http://157.230.26.97:3000/code/bombdle-backend/words.txt')
     .then(response => response.text())
     .then(text => {
         validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));
@@ -24,7 +24,7 @@ fetch('http://157.230.26.97:8080/code/bombdle-backend/words.txt')
     .catch(error => console.error('Failed to load words:', error));
 
 function createLobby() {
-    fetch('http://157.230.26.97:8080/create-lobby', { method: 'POST' })
+    fetch('http://157.230.26.97:3000/create-lobby', { method: 'POST' })
         .then((response) => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);

@@ -16,7 +16,7 @@ let timer;
 let validWords = new Set();
 let gameCode;
 
-fetch('http://159.89.9.120:3000/code/bombdle-backend/words.txt')
+fetch('http://159.89.9.120:3000/words.txt')
     .then(response => response.text())
     .then(text => {
         validWords = new Set(text.split('\n').map(word => word.trim().toLowerCase()));

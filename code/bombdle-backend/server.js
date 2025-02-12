@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -34,6 +35,11 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Serve words.txt file
+app.get('/words.txt', (req, res) => {
+    res.sendFile(path.join(__dirname, 'words.txt'));
+});
 
 app.post('/create-lobby', (req, res) => {
     const gameCode = generateGameCode();
